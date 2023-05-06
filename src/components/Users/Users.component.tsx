@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import useStore from "../../store.js"
-import { Button, Table } from "antd";
-import { User } from "../../types/types.js";
+import { Button, Modal, Table } from "antd";
+import { AntDesTableData, User } from "../../types/types.js";
 import AddModal from "../AddModal/AddModal.component.js";
 import "./Users.style.scss"
 
 import {DeleteOutlined} from "@ant-design/icons";
+import EditModal from "../EditModal/EditModal.component.js";
 
 
 const Users = () => {
@@ -61,23 +62,39 @@ const Users = () => {
     const {id, address, ...rest} = user;
     return { key: id, address: `${address.street}, ${address.city}`, ...rest };
   })
-  const [modalVisible, setModalVisible] = useState(false);
-  const openAddUserModal = () => setModalVisible(true);
+  const [addNewModalVisible, setAddNewModalVisible] = useState(false);
+  const [editNewModalVisible, setEditNewModalVisible] = useState(false);
+  const [selectedRowData, setSelectedRowData] = useState<{ record: AntDesTableData; rowIndex: number | undefined; } | null>(null);
 
-  const onUserDelete = ({key, ...rest}: {key: number}) => {
-    console.log("rest", rest);
-    
+  const openAddUserModal = () => setAddNewModalVisible(true);
+
+  const onUserDelete = ({key, ...rest}: {key: number}) => {    
     removeData(key)
   }
+
+  const handleRowClick = (record: AntDesTableData, rowIndex: number | undefined) => {    
+    setSelectedRowData({record, rowIndex});
+    setEditNewModalVisible(true);
+  };
   
   return (
     <div className="usersDataContainer">
-      <Table className="usersDataContainer__usersDataTable" dataSource={antTableData} columns={columns}/>
+      <Table 
+        className="usersDataContainer__usersDataTable"
+        dataSource={antTableData} 
+        columns={columns}
+        onRow={(record, rowIndex) => {
+          return {
+            onDoubleClick: () => handleRowClick(record, rowIndex),
+          };
+        }}
+        />
       <div className="usersDataContainer__userAddBtnContainer">
         <Button className="usersDataContainer__userAddBtn" type="primary" onClick={openAddUserModal}>Add User</Button>
       </div>
 
-      <AddModal open={modalVisible} onCancel={() => setModalVisible(false)}/>
+      {addNewModalVisible && <AddModal open={addNewModalVisible} onCancel={() => setAddNewModalVisible(false)}/>}
+      {editNewModalVisible && <EditModal open={editNewModalVisible} onCancel={() => setEditNewModalVisible(false)} rowUserData={selectedRowData!}/>}
     </div>
   )
 }

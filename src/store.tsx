@@ -26,6 +26,15 @@ const useStore = create<StoreState>((set) => ({
       console.error(error);
     }
   },
+  updateData: async (values: UserFormValues, id: number) => {
+    try {
+      const dataToUpdate = {id, ...values};
+      const backendUpdatedData = await axios.post('http://localhost:3000/updateUser', dataToUpdate);
+      set({data: backendUpdatedData.data}) 
+    } catch (error) {
+      console.error(error);
+    }
+  },
   removeData: async (userId: number) => {
     try {
       const backendUpdatedData = await axios.post('http://localhost:3000/deleteUser', {userId: userId});
@@ -33,7 +42,6 @@ const useStore = create<StoreState>((set) => ({
     } catch (error) {
       console.error(error);
     }
-    
   }
 }));
 
